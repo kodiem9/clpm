@@ -1,0 +1,6 @@
+Welcome to Command-Line Project Manager!
+
+clpm <arguments>
+Arguments:
+ - help: Shows all possible commands/arguments
+ - init: Create a project.
