@@ -1,19 +1,45 @@
 package main
 
 import "core:fmt"
+import "core:mem"
 import "core:os"
+import "core:path/filepath"
 import "core:strings"
 
 command_help :: proc() {
-	fmt.println("command help")
+	exe_path: string
+	{
+		exe_path_raw := os.args[0]
+		exe_path_raw_len := len(exe_path_raw)
+		exe_path_base_len := len(filepath.base(exe_path_raw))
 
-	// THIS IS NOT FINISHED!
-	file_path := "data/info/help.txt"
+		end_point := exe_path_raw_len - exe_path_base_len
+		exe_path = exe_path_raw[2:end_point]
+	}
+
+	file_path: string
+	{
+		file_path_raw := "data/info/help.txt"
+		if len(exe_path) == 0 {
+			file_path = file_path_raw
+		} else {
+			file_path_slices := [?]string{exe_path, file_path_raw}
+			file_path = strings.concatenate(file_path_slices[:])
+		}
+	}
+
+	// Reads the file
 	file, ok := os.read_entire_file(file_path, context.allocator)
 	if !ok {
-		fmt.println("")
+		log_message(.ERROR, "Could not find path `%s`.", file_path)
 	}
 	defer delete(file, context.allocator)
+
+	// Prints the file
+	it := string(file)
+	for line in strings.split_lines_iterator(&it) {
+		fmt.println(line)
+	}
 }
 
 command_init :: proc() {
@@ -42,6 +68,25 @@ log_message :: proc(type: Log_Type, msg: string, args: ..any) {
 }
 
 main :: proc() {
+	when ODIN_DEBUG {
+		fmt.println("DEBUG MODE")
+
+		// Taken from `odin-lang.org/docs/overview/`
+		track: mem.Tracking_Allocator
+		mem.tracking_allocator_init(&track, context.allocator)
+		context.allocator = mem.tracking_allocator(&track)
+
+		defer {
+			if len(track.allocation_map) > 0 {
+				fmt.eprintf("=== %v allocations not freed: ===\n", len(track.allocation_map))
+				for _, entry in track.allocation_map {
+					fmt.eprintf("- %v bytes @ %v\n", entry.size, entry.location)
+				}
+			}
+			mem.tracking_allocator_destroy(&track)
+		}
+	}
+
 	if len(os.args) == 1 {
 		command_help()
 		return
