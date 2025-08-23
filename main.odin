@@ -13,6 +13,7 @@ command_help :: proc() {
 		exe_path_raw_len := len(exe_path_raw)
 		exe_path_base_len := len(filepath.base(exe_path_raw))
 
+		// Basically what this part does: it ignores the two first characters and the length of the executable name. For example: ./path/to/folder/main -> path/to/folder
 		end_point := exe_path_raw_len - exe_path_base_len
 		exe_path = exe_path_raw[2:end_point]
 	}
@@ -23,8 +24,7 @@ command_help :: proc() {
 		if len(exe_path) == 0 {
 			file_path = file_path_raw
 		} else {
-			file_path_slices := [?]string{exe_path, file_path_raw}
-			file_path = strings.concatenate(file_path_slices[:])
+			file_path = strings.concatenate([]string{exe_path, file_path_raw})
 		}
 	}
 
