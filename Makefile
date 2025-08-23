@@ -1,11 +1,11 @@
 default:
-	odin run .
+	odin run source
 
 debug:
-	odin build . -out=main -debug
+	odin build source -out=main -debug
 
 build:
-	odin build . -out=main
+	odin build source -out=main
 
 test:
 	make build
