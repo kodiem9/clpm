@@ -26,7 +26,7 @@ Log_Type :: enum {
 	ERROR,
 }
 
-log_message :: proc(msg: string, type: Log_Type) {
+log_message :: proc(type: Log_Type, msg: string, args: ..any) {
 	switch type {
 	case .INFO:
 		fmt.print("[INFO]: ")
@@ -37,7 +37,8 @@ log_message :: proc(msg: string, type: Log_Type) {
 	case:
 		fmt.print("[UNKNOWN]: ")
 	}
-	fmt.println(msg)
+
+	fmt.printfln(msg, ..args)
 }
 
 main :: proc() {
@@ -54,14 +55,10 @@ main :: proc() {
 	case "init":
 		command_init()
 	case:
-		buffer: strings.Builder
 		log_message(
-			fmt.sbprintf(
-				&buffer,
-				"Argument `%s` does not exist! Type `help` to see valid arguments.",
-				main_argument,
-			),
 			.ERROR,
+			"Argument `%s` does not exist! Type `help` to see valid arguments.",
+			main_argument,
 		)
 	}
 }
